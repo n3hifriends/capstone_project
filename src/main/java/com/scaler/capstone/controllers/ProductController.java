@@ -1,5 +1,6 @@
 package com.scaler.capstone.controllers;
 
+import com.scaler.capstone.dtos.FakeStoreProductDto;
 import com.scaler.capstone.dtos.ProductDto;
 import com.scaler.capstone.models.Category;
 import com.scaler.capstone.models.Product;
@@ -67,4 +68,20 @@ public class ProductController {
         return product;
     }
 
+    @PutMapping("/{id}")
+    public ProductDto replaceProduct(@PathVariable Long id, @RequestBody ProductDto request) {
+        Product product = productService.replaceProduct(id, createProduct(request));
+        return toProductDto(product);
+    }
+
+    private Product createProduct(ProductDto productDto) {
+        Product product = new Product();
+        product.setId(productDto.getId());
+        product.setName(productDto.getTitle());
+        product.setPrice(productDto.getPrice());
+        product.setDescription(productDto.getDescription());
+        product.setCategory(new Category());
+        product.setImageUrl(productDto.getImage());
+        return product;
+    }
 }

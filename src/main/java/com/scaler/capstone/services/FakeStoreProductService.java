@@ -5,8 +5,13 @@ import com.scaler.capstone.models.Category;
 import com.scaler.capstone.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -57,5 +62,20 @@ public class FakeStoreProductService implements IProductService {
                 .collect(Collectors.toList());
 
         return products;
+    }
+
+    @Override
+    public Product replaceProduct(Long productId, Product request) {
+        ResponseEntity<Product> responseEntity = postForEntity("https://fakestoreapi.com/products/{productId}", HttpMethod.PUT, request, Product.class, productId);
+        return responseEntity.getBody();
+    }
+
+
+    public <T> ResponseEntity<T> postForEntity(String url, HttpMethod httpMethod, @Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
+        ResponseExtractor<ResponseEntity<T>> responseExtractor = restTemplate.responseEntityExtractor(responseType);
+        return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
     }
 }
