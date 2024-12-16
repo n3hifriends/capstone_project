@@ -56,7 +56,7 @@ public class ProductController {
 //            return ResponseEntity.notFound().build();
         }
         params.add("called by", "Intelligent");
-        return new ResponseEntity<>(null, params, HttpStatus.OK);
+        return new ResponseEntity<>(toProductDto(product), params, HttpStatus.OK);
 
 //        return ResponseEntity.ok(toProductDto(product));
     }
