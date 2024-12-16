@@ -7,6 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FakeStoreProductService implements IProductService {
@@ -41,4 +47,15 @@ public class FakeStoreProductService implements IProductService {
         return product;
     }
 
+    @Override
+    public List<Product> getAllProducts() {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        ResponseEntity<FakeStoreProductDto[]> responseEntity = restTemplate.getForEntity("https://fakestoreapi.com/products", FakeStoreProductDto[].class);
+
+        List<Product> products = Arrays.stream(responseEntity.getBody())
+                .map(this::createProduct) // Use createProduct to map each DTO to a Product
+                .collect(Collectors.toList());
+
+        return products;
+    }
 }

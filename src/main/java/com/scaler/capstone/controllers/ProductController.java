@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
@@ -24,21 +25,9 @@ public class ProductController {
     private IProductService productService;
 
     @GetMapping
-    public List<Product> getAllProducts() {
-        Product product = new Product();
-        product.setId(1L);
-        product.setName("iPhone");
-        product.setCategory(new Category());
-        product.setDescription("dfadf");
-        product.setImageUrl("dfasd");
-        product.setPrice(3423);
-        product.setCreatedAt(new Date());
-        product.setLastUpdatedAt(new Date());
-        product.setState(State.ACTIVE);
-
-        List<Product> products = new ArrayList<>();
-        products.add(product);
-        return products;
+    public List<ProductDto> getAllProducts() {
+        List<Product> products = productService.getAllProducts();
+        return products.stream().map(this::toProductDto).collect(Collectors.toList());
     }
 
     @GetMapping("{id}")
@@ -61,7 +50,7 @@ public class ProductController {
 //        return ResponseEntity.ok(toProductDto(product));
     }
 
-    public static ProductDto toProductDto(Product product) {
+    public ProductDto toProductDto(Product product) {
         ProductDto productDto = new ProductDto();
         productDto.setId(product.getId());
         productDto.setTitle(product.getName());
@@ -77,4 +66,5 @@ public class ProductController {
 
         return product;
     }
+
 }
