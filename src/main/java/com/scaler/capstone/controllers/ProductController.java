@@ -33,22 +33,24 @@ public class ProductController {
 
     @GetMapping("{id}")
     public ResponseEntity<ProductDto> findProductById(@PathVariable Long id) {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        if(id <= 0){
-            params.add("called by", "bhudwak");
-            return new ResponseEntity<>(null, params, HttpStatus.BAD_REQUEST);
-//            return ResponseEntity.badRequest().headers(params).build();
-        }
-        Product product = productService.getProductById(id);
-        if( product == null){
-            return new ResponseEntity<>(null, params, HttpStatus.NOT_FOUND);
+        try {
 
-//            return ResponseEntity.notFound().build();
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            if (id <= 0) {
+                throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
+            }
+            Product product = productService.getProductById(id);
+            if (product == null) {
+                throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
+            }
+            params.add("called by", "Intelligent");
+            return new ResponseEntity<>(toProductDto(product), params, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
+        } catch (Exception e) {
         }
-        params.add("called by", "Intelligent");
-        return new ResponseEntity<>(toProductDto(product), params, HttpStatus.OK);
 
-//        return ResponseEntity.ok(toProductDto(product));
+        return null;
     }
 
     public ProductDto toProductDto(Product product) {
@@ -57,7 +59,7 @@ public class ProductController {
         productDto.setTitle(product.getName());
         productDto.setPrice(product.getPrice());
         productDto.setDescription(product.getDescription());
-        productDto.setCategory(""+product.getCategory());
+        productDto.setCategory("" + product.getCategory());
         productDto.setImage(product.getImageUrl());
         return productDto;
     }

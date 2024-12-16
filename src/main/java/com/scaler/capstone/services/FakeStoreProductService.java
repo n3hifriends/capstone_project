@@ -1,5 +1,6 @@
 package com.scaler.capstone.services;
 
+import com.scaler.capstone.clients.FakeStoreApiClient;
 import com.scaler.capstone.dtos.FakeStoreProductDto;
 import com.scaler.capstone.models.Category;
 import com.scaler.capstone.models.Product;
@@ -22,60 +23,30 @@ import java.util.stream.Collectors;
 @Service
 public class FakeStoreProductService implements IProductService {
 
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
+
 
     // instead use @Autowired
 //    public FakeStoreProductService(RestTemplateBuilder restTemplateBuilder) {
 //        this.restTemplateBuilder = restTemplateBuilder;
 //    }
 
+    @Autowired
+    FakeStoreApiClient fakeStoreApiClient;
+
     @Override
     public Product getProductById(Long productId) {
-        ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity = restTemplateBuilder.build().getForEntity("https://fakestoreapi.com/products/{productId}", FakeStoreProductDto.class, productId);
-        if (fakeStoreProductDtoResponseEntity.getStatusCode().is2xxSuccessful() &&
-                fakeStoreProductDtoResponseEntity.getBody() != null) {
-            return createProduct(fakeStoreProductDtoResponseEntity.getBody());
-        }
-        return null;
-
-    }
-
-    private Product createProduct(FakeStoreProductDto fakeStoreProductDto) {
-        Product product = new Product();
-        product.setId(fakeStoreProductDto.getId());
-        product.setName(fakeStoreProductDto.getTitle());
-        product.setPrice(fakeStoreProductDto.getPrice());
-        product.setDescription(fakeStoreProductDto.getDescription());
-        product.setCategory(new Category());
-        product.setImageUrl(fakeStoreProductDto.getImage());
-        return product;
+        return fakeStoreApiClient.getProductById(productId);
     }
 
     @Override
     public List<Product> getAllProducts() {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<FakeStoreProductDto[]> responseEntity = restTemplate.getForEntity("https://fakestoreapi.com/products", FakeStoreProductDto[].class);
-
-        List<Product> products = Arrays.stream(responseEntity.getBody())
-                .map(this::createProduct) // Use createProduct to map each DTO to a Product
-                .collect(Collectors.toList());
-
-        return products;
+        return fakeStoreApiClient.getAllProducts();
     }
 
     @Override
     public Product replaceProduct(Long productId, Product request) {
-        ResponseEntity<Product> responseEntity = postForEntity("https://fakestoreapi.com/products/{productId}", HttpMethod.PUT, request, Product.class, productId);
-        return responseEntity.getBody();
+        return fakeStoreApiClient.replaceProduct(productId, request);
     }
 
 
-    public <T> ResponseEntity<T> postForEntity(String url, HttpMethod httpMethod, @Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-
-        RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
-        ResponseExtractor<ResponseEntity<T>> responseExtractor = restTemplate.responseEntityExtractor(responseType);
-        return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
-    }
 }
