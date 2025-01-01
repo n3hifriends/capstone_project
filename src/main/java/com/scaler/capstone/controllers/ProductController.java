@@ -1,20 +1,17 @@
 package com.scaler.capstone.controllers;
 
-import com.scaler.capstone.dtos.FakeStoreProductDto;
 import com.scaler.capstone.dtos.ProductDto;
 import com.scaler.capstone.models.Category;
 import com.scaler.capstone.models.Product;
-import com.scaler.capstone.models.State;
 import com.scaler.capstone.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +20,16 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     @Autowired
-    private IProductService productService;
+    @Qualifier("fps")
+    private IProductService productServiceFps;
+
+    @Autowired
+    @Qualifier("sps")
+    private IProductService productServiceSps;
 
     @GetMapping
     public List<ProductDto> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
+        List<Product> products = productServiceFps.getAllProducts();
         return products.stream().map(this::toProductDto).collect(Collectors.toList());
     }
 
@@ -39,7 +41,7 @@ public class ProductController {
             if (id <= 0) {
                 throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
             }
-            Product product = productService.getProductById(id);
+            Product product = productServiceFps.getProductById(id);
             if (product == null) {
                 throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
             }
@@ -65,24 +67,25 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-
-        return product;
+    public Product createProduct(@RequestBody ProductDto request) {
+        return productServiceSps.saveProduct(_createProduct(request));
     }
 
     @PutMapping("/{id}")
     public ProductDto replaceProduct(@PathVariable Long id, @RequestBody ProductDto request) {
-        Product product = productService.replaceProduct(id, createProduct(request));
+        Product product = productServiceFps.replaceProduct(id, _createProduct(request));
         return toProductDto(product);
     }
 
-    private Product createProduct(ProductDto productDto) {
+    private Product _createProduct(ProductDto productDto) {
         Product product = new Product();
         product.setId(productDto.getId());
         product.setName(productDto.getTitle());
         product.setPrice(productDto.getPrice());
         product.setDescription(productDto.getDescription());
-        product.setCategory(new Category());
+        Category cat = new Category();
+        cat.setId(Long.decode(""+Math.random()));
+        product.setCategory(cat);
         product.setImageUrl(productDto.getImage());
         return product;
     }
