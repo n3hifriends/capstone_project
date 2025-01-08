@@ -38,8 +38,10 @@ public class ProductController {
         try {
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            if (id <= 0) {
+            if (id < 0) {
                 throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
+            }else if(id == 0){
+                throw new IllegalArgumentException("Product id can't be 0"); // thrown from ControllerAdvice, it will call automatically
             }
             Product product = productServiceFps.getProductById(id);
             if (product == null) {
