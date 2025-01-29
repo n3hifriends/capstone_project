@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     @Autowired
-    @Qualifier("fps")
+//    @Qualifier("fps")
     private IProductService productServiceFps;
 
-    @Autowired
-    @Qualifier("sps")
-    private IProductService productServiceSps;
+//    @Autowired
+//    @Qualifier("sps")
+//    private IProductService productServiceSps;
 
     @GetMapping
     public List<ProductDto> getAllProducts() {
@@ -70,7 +70,7 @@ public class ProductController {
 
     @PostMapping
     public Product createProduct(@RequestBody ProductDto request) {
-        return productServiceSps.saveProduct(_createProduct(request));
+        return productServiceFps.saveProduct(_createProduct(request));
     }
 
     @PutMapping("/{id}")

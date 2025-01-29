@@ -14,6 +14,22 @@ public class ProductRepoTest {
     @Autowired
     public ProductRepo productRepo;
 
+    // for inserting data into DB purpose while working on aws
+    @Test
+    public void insertProductInDatabase() {
+        Product product = new Product();
+        product.setName("test");
+        product.setPrice(34L);
+        product.setId(3243L);
+        productRepo.save(product);
+
+        Product product1 = new Product();
+        product1.setId(3423L);
+        product1.setName("test1");
+        product1.setPrice(341L);
+        productRepo.save(product1);
+    }
+
     @Test
     public void testProductByOrderJpa(){
         List<Product> products = productRepo.findProductByOrderByPrice();
