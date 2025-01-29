@@ -1,6 +1,8 @@
 package com.scaler.capstone.repos;
 
 import com.scaler.capstone.models.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -22,4 +24,5 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     @Query("SELECT c.name from Category c join Product p on p.category.id = c.id where p.id=:pid")
     String findCategoryNameFromProductId(Long pid);
 
+    Page<Product> findProductByName(String name, Pageable pageable);
 }
