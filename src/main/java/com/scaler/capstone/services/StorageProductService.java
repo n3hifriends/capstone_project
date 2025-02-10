@@ -1,11 +1,15 @@
 package com.scaler.capstone.services;
 
+import com.scaler.capstone.dtos.ProductDto;
 import com.scaler.capstone.models.Product;
+import com.scaler.capstone.models.UserDto;
 import com.scaler.capstone.repos.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +19,9 @@ public class StorageProductService implements IProductService{
 
     @Autowired
     private ProductRepo productRepo;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public Product getProductById(Long productId) {
@@ -32,6 +39,17 @@ public class StorageProductService implements IProductService{
             return null;
         }
         return product;
+    }
+
+    @Override
+    public Product getProductBasedOnUserId(Long pid, Long uid) {
+        Optional<Product> product = productRepo.findProductById(pid);
+//        RestTemplate restTemplate = new RestTemplate();
+        UserDto userDto = restTemplate.getForEntity("http://UserAuthenticationServices/users/{uid}/" + uid, UserDto.class).getBody();
+        if(uid == userDto.getId()){
+            return product.orElse(null);
+        }
+        return null;
     }
 
     @Override

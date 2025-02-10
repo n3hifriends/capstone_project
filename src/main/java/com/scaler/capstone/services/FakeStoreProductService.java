@@ -1,6 +1,7 @@
 package com.scaler.capstone.services;
 
 import com.scaler.capstone.clients.FakeStoreApiClient;
+import com.scaler.capstone.dtos.ProductDto;
 import com.scaler.capstone.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,10 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public Product saveProduct(Product request) {
         return fakeStoreApiClient.saveProduct(request);
+    }
+
+    @Override
+    public Product getProductBasedOnUserId(Long pid, Long uid) {
+        return null;
     }
 }

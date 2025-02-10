@@ -91,4 +91,11 @@ public class ProductController {
         product.setImageUrl(productDto.getImage());
         return product;
     }
+
+    @GetMapping("{pid}/{uid}")
+    public ProductDto getProductBasedOnUserId(@PathVariable Long pid, @PathVariable Long uid) {
+        productServiceFps.getProductBasedOnUserId(pid, uid);
+        return toProductDto(productServiceFps.getProductById(uid));
+    }
+
 }
