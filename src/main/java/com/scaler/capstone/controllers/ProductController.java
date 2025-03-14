@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     @Autowired
-//    @Qualifier("fps")
+    @Qualifier("fps")
     private IProductService productServiceFps;
 
 //    @Autowired

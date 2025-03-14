@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("sps")
-@Primary // If IProductService implements multiple classes, it will consider this class
+//@Primary // If IProductService implements multiple classes, it will consider this class
 public class StorageProductService implements IProductService{
 
     @Autowired
