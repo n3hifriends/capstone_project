@@ -43,11 +43,11 @@ public class StorageProductService implements IProductService{
 
     @Override
     public Product getProductBasedOnUserId(Long pid, Long uid) {
-        Optional<Product> product = productRepo.findProductById(pid);
+        Optional<Product> productOptional = productRepo.findProductById(pid);
 //        RestTemplate restTemplate = new RestTemplate();
-        UserDto userDto = restTemplate.getForEntity("http://UserAuthenticationServices/users/{uid}/" + uid, UserDto.class).getBody();
-        if(uid == userDto.getId()){
-            return product.orElse(null);
+        UserDto userDto = restTemplate.getForEntity("http://UserAuthenticationServices/users/userId/{uid}" , UserDto.class, uid).getBody();
+        if(userDto != null) {
+            return productOptional.orElse(null);
         }
         return null;
     }

@@ -3,6 +3,7 @@ package com.scaler.capstone.controllers;
 import com.scaler.capstone.dtos.ProductDto;
 import com.scaler.capstone.models.Category;
 import com.scaler.capstone.models.Product;
+import com.scaler.capstone.models.State;
 import com.scaler.capstone.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,7 +13,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,9 +26,9 @@ public class ProductController {
     @Qualifier("fps")
     private IProductService productServiceFps;
 
-//    @Autowired
-//    @Qualifier("sps")
-//    private IProductService productServiceSps;
+    @Autowired
+    @Qualifier("sps")
+    private IProductService productServiceSps;
 
     @GetMapping
     public List<ProductDto> getAllProducts() {
@@ -40,7 +43,7 @@ public class ProductController {
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             if (id < 0) {
                 throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
-            }else if(id == 0){
+            } else if (id == 0) {
                 throw new IllegalArgumentException("Product id can't be 0"); // thrown from ControllerAdvice, it will call automatically
             }
             Product product = productServiceFps.getProductById(id);
@@ -52,20 +55,22 @@ public class ProductController {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid product id"); // thrown from ControllerAdvice, it will call automatically
         } catch (Exception e) {
+            throw new RuntimeException("Unexpected error", e);
         }
-
-        return null;
     }
 
     public ProductDto toProductDto(Product product) {
-        ProductDto productDto = new ProductDto();
-        productDto.setId(product.getId());
-        productDto.setTitle(product.getName());
-        productDto.setPrice(product.getPrice());
-        productDto.setDescription(product.getDescription());
-        productDto.setCategory("" + product.getCategory());
-        productDto.setImage(product.getImageUrl());
-        return productDto;
+        if (product != null) {
+            ProductDto productDto = new ProductDto();
+            productDto.setId(product.getId());
+            productDto.setTitle(product.getName());
+            productDto.setPrice(product.getPrice());
+            productDto.setDescription(product.getDescription());
+            productDto.setCategory(product.getCategory().getName());
+            productDto.setImage(product.getImageUrl());
+            return productDto;
+        }
+        return null;
     }
 
     @PostMapping
@@ -85,17 +90,35 @@ public class ProductController {
         product.setName(productDto.getTitle());
         product.setPrice(productDto.getPrice());
         product.setDescription(productDto.getDescription());
+
         Category cat = new Category();
-        cat.setId(Long.decode(""+Math.random()));
+        Random random = new Random();
+        long randomId = random.nextLong();
+        // Ensure the random value is positive
+        if (randomId < 0) {
+            randomId = -randomId;
+        }
+        cat.setId(randomId);
+        cat.setCreatedAt(new Date());
+        cat.setName(productDto.getCategory());
+        cat.setDescription(productDto.getCategory());
+        cat.setLastUpdatedAt(new Date());
+        cat.setState(State.ACTIVE);
         product.setCategory(cat);
+
         product.setImageUrl(productDto.getImage());
         return product;
     }
 
     @GetMapping("{pid}/{uid}")
-    public ProductDto getProductBasedOnUserId(@PathVariable Long pid, @PathVariable Long uid) {
-        productServiceFps.getProductBasedOnUserId(pid, uid);
-        return toProductDto(productServiceFps.getProductById(uid));
+    public ResponseEntity<ProductDto> getProductBasedOnUserId(@PathVariable Long pid, @PathVariable Long uid) {
+        Product productBasedOnUserId = productServiceFps.getProductBasedOnUserId(pid, uid);
+        ProductDto productDto = toProductDto(productBasedOnUserId);
+        if(productDto == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else{
+            return new ResponseEntity<>(productDto, HttpStatus.OK);
+        }
     }
 
 }

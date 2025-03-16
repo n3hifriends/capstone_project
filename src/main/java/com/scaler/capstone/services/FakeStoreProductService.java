@@ -3,19 +3,26 @@ package com.scaler.capstone.services;
 import com.scaler.capstone.clients.FakeStoreApiClient;
 import com.scaler.capstone.dtos.FakeStoreProductDto;
 import com.scaler.capstone.dtos.ProductDto;
+import com.scaler.capstone.models.Category;
 import com.scaler.capstone.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service("fps")
 @Primary
 public class FakeStoreProductService implements IProductService {
 
-
+    @Autowired
+    private RestTemplateBuilder restTemplateBuilder;
 
     // instead use @Autowired
 //    public FakeStoreProductService(RestTemplateBuilder restTemplateBuilder) {
@@ -51,6 +58,10 @@ public class FakeStoreProductService implements IProductService {
         FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
         fakeStoreProductDto.setId(product.getId());
         fakeStoreProductDto.setTitle(product.getName());
+        fakeStoreProductDto.setDescription(product.getDescription());
+        fakeStoreProductDto.setPrice(product.getPrice());
+        fakeStoreProductDto.setCategory(product.getCategory().getName());
+        fakeStoreProductDto.setImage(product.getImageUrl());
 
         return fakeStoreProductDto;
     }
@@ -59,6 +70,13 @@ public class FakeStoreProductService implements IProductService {
         Product product = new Product();
         product.setId(fakeStoreProductDto.getId());
         product.setName(fakeStoreProductDto.getTitle());
+        Category cat =  new Category();
+        cat.setName(fakeStoreProductDto.getCategory());
+        product.setCategory(cat);
+        product.setPrice(fakeStoreProductDto.getPrice());
+        product.setDescription(fakeStoreProductDto.getDescription());
+        product.setImageUrl(fakeStoreProductDto.getImage());
+
         return product;
     }
 
@@ -66,6 +84,23 @@ public class FakeStoreProductService implements IProductService {
     public List<Product> getAllProducts() {
         return fakeStoreApiClient.getAllProducts();
     }
+
+//    @Override
+//    public List<Product> getAllProducts() {
+//        List<Product> products = new ArrayList<>();
+//        RestTemplate restTemplate = restTemplateBuilder.build();
+//
+//        ResponseEntity<FakeStoreProductDto[]> listResponseEntity =
+//                restTemplate.getForEntity("http://fakestoreapi.com/products",
+//                        FakeStoreProductDto[].class);
+//
+//        for(FakeStoreProductDto fakeStoreProductDto : listResponseEntity.getBody()) {
+//            products.add(from(fakeStoreProductDto));
+//        }
+//
+//        return products;
+//    }
+
 
     @Override
     public Product replaceProduct(Long productId, Product request) {
@@ -80,5 +115,18 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public Product getProductBasedOnUserId(Long pid, Long uid) {
         return null;
+    }
+
+    private Product from(FakeStoreProductDto fakeStoreProductDto) {
+        Product product = new Product();
+        product.setId(fakeStoreProductDto.getId());
+        product.setName(fakeStoreProductDto.getTitle());
+        product.setDescription(fakeStoreProductDto.getDescription());
+        product.setPrice(fakeStoreProductDto.getPrice());
+        product.setImageUrl(fakeStoreProductDto.getImage());
+        Category category = new Category();
+        category.setName(fakeStoreProductDto.getCategory());
+        product.setCategory(category);
+        return product;
     }
 }

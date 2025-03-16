@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 //@RunWith(SpringRunner.class)
-@SpringBootTest()
+@SpringBootTest
 public class ProductRepoTest {
 
     @Autowired
@@ -19,14 +19,14 @@ public class ProductRepoTest {
     public void insertProductInDatabase() {
         Product product = new Product();
         product.setName("test");
-        product.setPrice(34L);
+        product.setPrice((double) 34L);
         product.setId(3243L);
         productRepo.save(product);
 
         Product product1 = new Product();
         product1.setId(3423L);
         product1.setName("test1");
-        product1.setPrice(341L);
+        product1.setPrice((double) 341L);
         productRepo.save(product1);
     }
 
