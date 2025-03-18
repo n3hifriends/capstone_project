@@ -52,6 +52,11 @@ public class FakeStoreApiClient {
         return responseEntity.getBody();
     }
 
+    public Product saveProduct(Product request) {
+        ResponseEntity<Product> responseEntity = postForEntity("https://fakestoreapi.com/products", HttpMethod.POST, request, Product.class);
+        return responseEntity.getBody();
+    }
+
     private Product validate(Product product){
         if(product == null){
             throw new IllegalArgumentException("Oops, something went wrong");
